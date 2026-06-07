@@ -7,52 +7,60 @@
 #define NAVIO 3
 
 int main() {
-    // Cria o tabuleiro preenchido com Água (0)
+    // Inicializa o tabuleiro 10x10 com 0 (Água)
     int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO] = {AGUA};
 
-    // Coordenadas iniciais de cada tipo de navio
-    int linhaH = 0, colunaH = 2;   // Navio Horizontal
-    int linhaV = 4, colunaV = 1;   // Navio Vertical
-    int linhaD1 = 2, colunaD1 = 5; // Navio Diagonal (Aumenta linha e coluna)
-    int linhaD2 = 7, colunaD2 = 5; // Navio Diagonal (Diminui linha e aumenta coluna)
+    // Vetores unidimensionais representando os navios 
+    int navioHorizontal[TAM_NAVIO] = {NAVIO, NAVIO, NAVIO};
+    int navioVertical[TAM_NAVIO] = {NAVIO, NAVIO, NAVIO};
 
-    bool valido = true;
+    // Coordenadas iniciais 
+    int linhaH = 2, colunaH = 3; // Navio Horizontal começará em (2,3)
+    int linhaV = 5, colunaV = 6; // Navio Vertical começará em (5,6)
 
-    // Validações para garantir que nenhum navio saia do tabuleiro
-    if (colunaH + TAM_NAVIO > TAM_TABULEIRO || linhaH >= TAM_TABULEIRO) valido = false;
-    if (linhaV + TAM_NAVIO > TAM_TABULEIRO || colunaV >= TAM_TABULEIRO) valido = false;
-    if (linhaD1 + TAM_NAVIO > TAM_TABULEIRO || colunaD1 + TAM_NAVIO > TAM_TABULEIRO) valido = false;
-    if (linhaD2 - TAM_NAVIO < -1 || colunaD2 + TAM_NAVIO > TAM_TABULEIRO) valido = false;
+    // Variável de controle para validação
+    bool posicionamentoValido = true;
 
-    // Posiciona os navios alterando o valor da água (0) para Navio (3)
-    if (valido) {
+    // --- VALIDAÇÃO 1: Limites do Tabuleiro ---
+    // Verifica se o navio horizontal ultrapassa a borda direita
+    if (colunaH + TAM_NAVIO > TAM_TABULEIRO || linhaH >= TAM_TABULEIRO) {
+        posicionamentoValido = false;
+    }
+    // Verifica se o navio vertical ultrapassa a borda inferior
+    if (linhaV + TAM_NAVIO > TAM_TABULEIRO || colunaV >= TAM_TABULEIRO) {
+        posicionamentoValido = false;
+    }
+
+    // --- VALIDAÇÃO 2: Sobreposição ---
+    // Se passou na primeira validação, checa se os navios vão se colidir
+    if (posicionamentoValido) {
+        // Verifica se o navio vertical vai cruzar o espaço do horizontal
         for (int i = 0; i < TAM_NAVIO; i++) {
-            if (tabuleiro[linhaH][colunaH + i] != AGUA) valido = false;
-            tabuleiro[linhaH][colunaH + i] = NAVIO;
-
-            if (tabuleiro[linhaV + i][colunaV] != AGUA) valido = false;
-            tabuleiro[linhaV + i][colunaV] = NAVIO;
-
-            if (tabuleiro[linhaD1 + i][colunaD1 + i] != AGUA) valido = false;
-            tabuleiro[linhaD1 + i][colunaD1 + i] = NAVIO;
-
-            if (tabuleiro[linhaD2 - i][colunaD2 + i] != AGUA) valido = false;
-            tabuleiro[linhaD2 - i][colunaD2 + i] = NAVIO;
+            if (linhaV + i == linhaH && colunaV >= colunaH && colunaV < colunaH + TAM_NAVIO) {
+                posicionamentoValido = false;
+            }
         }
     }
 
-    if (!valido) {
-        printf("Erro: Posicionamento invalido ou houve sobreposicao de navios!\n");
-        return 1;
+    // --- POSICIONAMENTO E IMPRESSÃO ---
+    if (!posicionamentoValido) {
+        printf("Erro: Posições dos navios inválidas ou há sobreposição!\n");
+        return 1; // Encerra o programa com erro
     }
 
-    // Exibe o resultado final na tela
-    printf("=== TABULEIRO BATALHA NAVAL (AVENTUREIRO) ===\n\n");
+    // Copiando os dados dos vetores para a matriz do tabuleiro
+    for (int i = 0; i < TAM_NAVIO; i++) {
+        tabuleiro[linhaH][colunaH + i] = navioHorizontal[i]; // Preenche horizontalmente
+        tabuleiro[linhaV + i][colunaV] = navioVertical[i];   // Preenche verticalmente
+    }
+
+    // Exibição do tabuleiro usando loops aninhados
+    printf("=== TABULEIRO BATALHA NAVAL ===\n\n");
     for (int i = 0; i < TAM_TABULEIRO; i++) {
         for (int j = 0; j < TAM_TABULEIRO; j++) {
             printf("%d ", tabuleiro[i][j]);
         }
-        printf("\n");
+        printf("\n"); // Quebra de linha ao fim de cada linha da matriz
     }
 
     return 0;
